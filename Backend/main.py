@@ -10,14 +10,25 @@ app = FastAPI()
 class QuestionRequest(BaseModel):
     question: str
 
-# Allow frontend requests
+frontend_origin = os.getenv("FRONTEND_ORIGIN", "*")
+allowed_origins = (
+    ["*"]
+    if frontend_origin == "*"
+    else [origin.strip() for origin in frontend_origin.split(",")]
+)
+
+# Allow frontend requests.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+def health_check():
+    return {"status": "ok"}
 
 @app.post("/upload-audio")
 async def upload_audio(file: UploadFile = File(...)):

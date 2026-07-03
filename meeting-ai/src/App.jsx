@@ -1,5 +1,8 @@
 import { useRef, useState } from "react";
 
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+
 export default function App() {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
@@ -86,7 +89,7 @@ export default function App() {
 
       try {
         const response = await fetch(
-          "http://127.0.0.1:8000/upload-audio",
+          `${API_BASE_URL}/upload-audio`,
           {
             method: "POST",
             body: formData,
@@ -127,7 +130,7 @@ export default function App() {
   const askAI = async () => {
     try {
       const res = await fetch(
-        "http://127.0.0.1:8000/ask-ai",
+        `${API_BASE_URL}/ask-ai`,
         {
           method: "POST",
           headers: {
