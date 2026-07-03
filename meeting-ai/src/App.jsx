@@ -15,11 +15,19 @@ export default function App() {
 
   const startRecording = async () => {
   try {
-    const screenStream =
-      await navigator.mediaDevices.getDisplayMedia({
+    let screenStream = null;
+
+    try {
+      screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true,
       });
+    } catch (error) {
+      console.warn(
+        "Screen capture unavailable, continuing with microphone only:",
+        error
+      );
+    }
 
     const micStream =
       await navigator.mediaDevices.getUserMedia({
@@ -33,7 +41,10 @@ export default function App() {
     const destination =
       audioContext.createMediaStreamDestination();
 
-    if (screenStream.getAudioTracks().length > 0) {
+    if (
+      screenStream &&
+      screenStream.getAudioTracks().length > 0
+    ) {
       const screenSource =
         audioContext.createMediaStreamSource(
           screenStream
@@ -108,6 +119,14 @@ export default function App() {
       }
 
       setIsRecording(false);
+
+      screenStream
+        ?.getTracks()
+        .forEach((track) => track.stop());
+
+      micStream
+        .getTracks()
+        .forEach((track) => track.stop());
     };
 
     mediaRecorder.start();
@@ -116,6 +135,9 @@ export default function App() {
     console.error(
       "Recording failed:",
       error
+    );
+    setResponse(
+      "Recording permission was blocked. Allow microphone access and try again."
     );
   }
 };
